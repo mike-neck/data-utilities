@@ -1,0 +1,29 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    eclipse
+}
+
+dependencies {
+    compileOnly "org.jetbrains:annotations:15.0"
+    compileOnly "org.projectlombok:lombok:1.16.14"
+
+    testCompile "org.junit.jupiter:junit-jupiter-api:5.0.0-M3"
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:5.0.0-M3"
+
+    eclipse     "org.eclipse.jdt.core.compiler:ecj:4.6.1"
+}
+
+task ecj(type: JavaExec) {
+    main = 'org.eclipse.jdt.internal.compiler.batch.Main'
+    classpath configurations.eclipse.asPath
+    args '-encoding', 'utf8'
+    args '-source', '8'
+    args '-target', '8'
+    args '-cp', configurations.compileClasspath.asPath
+    args sourceSets.main.allJava
+}
