@@ -24,13 +24,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface First<T> extends Monoid<T, First<T>> {
+public interface Last<T> extends Monoid<T, Last<T>> {
 
     boolean isEmpty();
 
     @NotNull
     @Contract("null->fail")
-    <R> First<R> map(@NotNull Function<? super T, ? extends R> function);
+    <R> Last<R> map(@NotNull Function<? super T, ? extends R> function);
 
     @NotNull
     @Contract("null->fail")
@@ -38,40 +38,43 @@ public interface First<T> extends Monoid<T, First<T>> {
 
     @NotNull
     @Contract("null->fail")
-    First<T> append(@NotNull Supplier<? extends Optional<T>> candidate);
+    Last<T> append(@NotNull Supplier<? extends Optional<T>> candidate);
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @NotNull
     @Contract("null->fail")
-    First<T> append(@NotNull Optional<T> candidate);
+    Last<T> append(@NotNull Optional<T> candidate);
 
     @NotNull
     @Contract("null->fail")
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    static <T> First<T> of(@NotNull @NonNull Optional<T> candidate) {
-        return candidate.<First<T>>map(Already::new)
-                .orElseGet(Empty::new);
+    static <T> Last<T> of(@NotNull @NonNull Optional<T> candidate) {
+        return candidate.<Last<T>>map(Candidate::new)
+                .orElseGet(Yet::new);
     }
 
     @NotNull
     @Contract("null->!null;_->!null")
-    static <T> First<T> of(@Nullable T nullable) {
+    static <T> Last<T> of(@Nullable T nullable) {
         return of(Optional.ofNullable(nullable));
     }
 }
 
-class Already<T> implements First<T> {
+class Candidate<T> implements Last<T> {
 
     private final T value;
 
-    Already(T value) {
+    Candidate(@NotNull T value) {
         this.value = value;
     }
 
     @Override
-    public @NotNull First<T> append(@NotNull @NonNull First<T> other) {
+    public @NotNull Last<T> append(@NotNull @NonNull Last<T> other) {
         //noinspection Contract
-        return this;
+        if (other.isEmpty()) {
+            return this;
+        }
+        return other;
     }
 
     @Override
@@ -81,37 +84,37 @@ class Already<T> implements First<T> {
 
     @NotNull
     @Override
-    public <R> First<R> map(@NotNull @NonNull Function<? super T, ? extends R> function) {
-        return new Already<>(function.apply(value));
+    public <R> Last<R> map(@NotNull @NonNull Function<? super T, ? extends R> function) {
+        return new Candidate<>(function.apply(value));
     }
 
     @NotNull
     @Override
     public T or(@NotNull @NonNull Supplier<? extends T> candidate) {
-        //noinspection Contract
-        return value;
+        return candidate.get();
     }
 
     @NotNull
     @Override
-    public First<T> append(@NotNull @NonNull Supplier<? extends Optional<T>> candidate) {
-        //noinspection Contract
-        return this;
+    public Last<T> append(@NotNull @NonNull Supplier<? extends Optional<T>> candidate) {
+        return candidate.get()
+                .<Last<T>>map(Candidate::new)
+                .orElse(this);
     }
 
-    @NotNull
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    @NotNull
     @Override
-    public First<T> append(@NotNull @NonNull Optional<T> candidate) {
-        //noinspection Contract
-        return this;
+    public Last<T> append(@NotNull @NonNull Optional<T> candidate) {
+        return candidate.<Last<T>>map(Candidate::new)
+                .orElse(this);
     }
 }
 
-class Empty<T> implements First<T> {
+class Yet<T> implements Last<T> {
 
     @Override
-    public @NotNull First<T> append(@NotNull @NonNull First<T> other) {
+    public @NotNull Last<T> append(@NotNull @NonNull Last<T> other) {
         //noinspection Contract
         return other;
     }
@@ -123,8 +126,8 @@ class Empty<T> implements First<T> {
 
     @NotNull
     @Override
-    public <R> First<R> map(@NotNull @NonNull Function<? super T, ? extends R> function) {
-        return new Empty<>();
+    public <R> Last<R> map(@NotNull @NonNull Function<? super T, ? extends R> function) {
+        return new Yet<>();
     }
 
     @NotNull
@@ -135,17 +138,17 @@ class Empty<T> implements First<T> {
 
     @NotNull
     @Override
-    public First<T> append(@NotNull @NonNull Supplier<? extends Optional<T>> candidate) {
+    public Last<T> append(@NotNull @NonNull Supplier<? extends Optional<T>> candidate) {
         return candidate.get()
-                .<First<T>>map(Already::new)
+                .<Last<T>>map(Candidate::new)
                 .orElse(this);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @NotNull
     @Override
-    public First<T> append(@NotNull @NonNull Optional<T> candidate) {
-        return candidate.<First<T>>map(Already::new)
+    public Last<T> append(@NotNull @NonNull Optional<T> candidate) {
+        return candidate.<Last<T>>map(Candidate::new)
                 .orElse(this);
     }
 }

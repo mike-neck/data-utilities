@@ -82,7 +82,7 @@ public class FirstTest {
         }
 
         @Nested
-        class YetTest {
+        class EmptyTest {
 
             private final First<String> first = First.of(Optional.empty());
 
