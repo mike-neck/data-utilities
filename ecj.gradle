@@ -22,6 +22,7 @@ task ecj(type: JavaExec) {
     main = 'org.eclipse.jdt.internal.compiler.batch.Main'
     classpath configurations.eclipse.asPath
     args '-encoding', 'utf8'
+    args '-d', "none"
     args '-source', '8'
     args '-target', '8'
     args '-cp', configurations.compileClasspath.asPath
