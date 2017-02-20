@@ -1,0 +1,7 @@
+box: java
+build:
+  steps:
+    - script:
+      name: run gradle test
+      code: |
+        ./gradlew --full-stacktrace -q --project-cache-dir=$WERCKER_CACHE_DIR clean test
