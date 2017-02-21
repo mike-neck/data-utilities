@@ -153,7 +153,7 @@ public class FirstTest {
 
             final First<Object> actual = first.append(second);
             assertTrue(actual.isEmpty());
-            assertEquals("empty", actual.or(() -> ""));
+            assertEquals("empty", actual.or(() -> "empty"));
         }
     }
 }
