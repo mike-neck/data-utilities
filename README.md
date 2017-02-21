@@ -1,3 +1,5 @@
+[![wercker status](https://app.wercker.com/status/983d0aff29f05743895f7a79deab3698/s/ "wercker status")](https://app.wercker.com/project/byKey/983d0aff29f05743895f7a79deab3698)
+
 Data utilities
 ---
 
