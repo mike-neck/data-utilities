@@ -58,6 +58,12 @@ public interface First<T> extends Monoid<T, First<T>> {
     static <T> First<T> of(@Nullable T nullable) {
         return of(Optional.ofNullable(nullable));
     }
+
+    @NotNull
+    @Contract(" -> !null")
+    static <T> First<T> empty() {
+        return new Empty<>();
+    }
 }
 
 class Already<T> implements First<T> {

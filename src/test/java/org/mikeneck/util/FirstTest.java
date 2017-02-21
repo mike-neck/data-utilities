@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FirstTest {
 
@@ -84,7 +86,7 @@ public class FirstTest {
         @Nested
         class EmptyTest {
 
-            private final First<String> first = First.of(Optional.empty());
+            private final First<String> first = First.empty();
 
             @Test
             void appendNotEmpty() {
@@ -113,6 +115,45 @@ public class FirstTest {
                         .or(() -> "empty");
                 assertEquals("empty", actual);
             }
+        }
+
+        @Test
+        void alreadyAppendEmptyReturnsAlready() {
+            final First<String> already = First.of("first");
+            final First<String> empty = First.empty();
+
+            final First<String> actual = already.append(empty);
+            assertFalse(actual.isEmpty());
+            assertEquals("first", actual.or(fail));
+        }
+
+        @Test
+        void alreadyAppendAlreadyReturnsFirstAlready() {
+            final First<String> first = First.of("first");
+            final First<String> second = First.of("second");
+            final String actual = first.append(second).or(fail);
+            assertFalse(actual.isEmpty());
+            assertEquals("first", actual);
+        }
+
+        @Test
+        void emptyAppendAlreadyReturnsAlready() {
+            final First<String> empty = First.empty();
+            final First<String> already = First.of("first");
+
+            final First<String> actual = empty.append(already);
+            assertFalse(actual.isEmpty());
+            assertEquals("first", actual.or(fail));
+        }
+
+        @Test
+        void emptyAppendEmptyReturnsEmpty() {
+            final First<Object> first = First.empty();
+            final First<Object> second = First.empty();
+
+            final First<Object> actual = first.append(second);
+            assertTrue(actual.isEmpty());
+            assertEquals("empty", actual.or(() -> ""));
         }
     }
 }
