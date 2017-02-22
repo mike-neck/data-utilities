@@ -50,7 +50,7 @@ public interface First<T> extends Monoid<T, First<T>> {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     static <T> First<T> of(@NotNull @NonNull Optional<T> candidate) {
         return candidate.<First<T>>map(Already::new)
-                .orElseGet(Empty::new);
+                .orElseGet(Already.Empty::new);
     }
 
     @NotNull
@@ -62,7 +62,7 @@ public interface First<T> extends Monoid<T, First<T>> {
     @NotNull
     @Contract(" -> !null")
     static <T> First<T> empty() {
-        return new Empty<>();
+        return new Already.Empty<>();
     }
 }
 
@@ -112,46 +112,47 @@ class Already<T> implements First<T> {
         //noinspection Contract
         return this;
     }
+
+    static class Empty<T> implements First<T> {
+    
+        @Override
+        public @NotNull First<T> append(@NotNull @NonNull First<T> other) {
+            //noinspection Contract
+            return other;
+        }
+    
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+    
+        @NotNull
+        @Override
+        public <R> First<R> map(@NotNull @NonNull Function<? super T, ? extends R> function) {
+            return new Empty<>();
+        }
+    
+        @NotNull
+        @Override
+        public T or(@NotNull @NonNull Supplier<? extends T> candidate) {
+            return candidate.get();
+        }
+    
+        @NotNull
+        @Override
+        public First<T> append(@NotNull @NonNull Supplier<? extends Optional<T>> candidate) {
+            return candidate.get()
+                    .<First<T>>map(Already::new)
+                    .orElse(this);
+        }
+    
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        @NotNull
+        @Override
+        public First<T> append(@NotNull @NonNull Optional<T> candidate) {
+            return candidate.<First<T>>map(Already::new)
+                    .orElse(this);
+        }
+    }
 }
 
-class Empty<T> implements First<T> {
-
-    @Override
-    public @NotNull First<T> append(@NotNull @NonNull First<T> other) {
-        //noinspection Contract
-        return other;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return true;
-    }
-
-    @NotNull
-    @Override
-    public <R> First<R> map(@NotNull @NonNull Function<? super T, ? extends R> function) {
-        return new Empty<>();
-    }
-
-    @NotNull
-    @Override
-    public T or(@NotNull @NonNull Supplier<? extends T> candidate) {
-        return candidate.get();
-    }
-
-    @NotNull
-    @Override
-    public First<T> append(@NotNull @NonNull Supplier<? extends Optional<T>> candidate) {
-        return candidate.get()
-                .<First<T>>map(Already::new)
-                .orElse(this);
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    @NotNull
-    @Override
-    public First<T> append(@NotNull @NonNull Optional<T> candidate) {
-        return candidate.<First<T>>map(Already::new)
-                .orElse(this);
-    }
-}
