@@ -22,9 +22,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FirstTest {
 
@@ -47,7 +45,10 @@ public class FirstTest {
     @Nested
     class Append {
 
-        private final Supplier<String> fail = () -> { Assertions.fail("this code should not be executed"); return ""; };
+        private final Supplier<String> fail = () -> {
+            Assertions.fail("this code should not be executed");
+            return "";
+        };
 
         @Nested
         class AlreadyTest {
@@ -123,8 +124,10 @@ public class FirstTest {
             final First<String> empty = First.empty();
 
             final First<String> actual = already.append(empty);
-            assertFalse(actual.isEmpty());
-            assertEquals("first", actual.or(fail));
+            assertAll(
+                    () -> assertFalse(actual.isEmpty()),
+                    () -> assertEquals("first", actual.or(fail))
+            );
         }
 
         @Test
@@ -132,8 +135,10 @@ public class FirstTest {
             final First<String> first = First.of("first");
             final First<String> second = First.of("second");
             final String actual = first.append(second).or(fail);
-            assertFalse(actual.isEmpty());
-            assertEquals("first", actual);
+            assertAll(
+                    () -> assertFalse(actual.isEmpty()),
+                    () -> assertEquals("first", actual)
+            );
         }
 
         @Test
@@ -142,8 +147,10 @@ public class FirstTest {
             final First<String> already = First.of("first");
 
             final First<String> actual = empty.append(already);
-            assertFalse(actual.isEmpty());
-            assertEquals("first", actual.or(fail));
+            assertAll(
+                    () -> assertFalse(actual.isEmpty()),
+                    () -> assertEquals("first", actual.or(fail))
+            );
         }
 
         @Test
@@ -152,8 +159,40 @@ public class FirstTest {
             final First<Object> second = First.empty();
 
             final First<Object> actual = first.append(second);
-            assertTrue(actual.isEmpty());
-            assertEquals("empty", actual.or(() -> "empty"));
+            assertAll(
+                    () -> assertTrue(actual.isEmpty()),
+                    () -> assertEquals("empty", actual.or(() -> "empty"))
+            );
+        }
+    }
+
+    @Nested
+    class Map {
+
+        private final Supplier<String> fail = () -> {
+            Assertions.fail("this code should not be executed");
+            return "";
+        };
+
+        @Test
+        void mapAlreadyReturnsMappedValue() {
+            final First<String> first = First.of("test-code");
+            final First<String> actual = first.map(String::toUpperCase);
+            assertAll(
+                    () -> assertFalse(actual.isEmpty()),
+                    () -> assertEquals("TEST-CODE", actual.or(fail))
+            );
+        }
+
+        @Test
+        void mapEmptyReturnsEmpty() {
+            final First<Object> empty = First.empty();
+            final First<String> actual = empty.map(Object::toString);
+
+            assertAll(
+                    () -> assertTrue(actual.isEmpty()),
+                    () -> assertEquals("empty", actual.or(() -> "empty"))
+            );
         }
     }
 }
